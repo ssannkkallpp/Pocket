@@ -1,9 +1,18 @@
 import express from 'express'
 import cors from 'cors'
 import fetch from 'node-fetch'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const isProd = process.env.NODE_ENV === 'production'
 
 const app = express()
 app.use(cors())
+
+if (isProd) {
+  app.use(express.static(path.join(__dirname, 'dist')))
+}
 
 app.get('/api/fetch', async (req, res) => {
   const { url } = req.query
@@ -25,4 +34,9 @@ app.get('/api/fetch', async (req, res) => {
   }
 })
 
-app.listen(3001, () => console.log('Backend running on http://localhost:3001'))
+if (isProd) {
+  app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')))
+}
+
+const port = process.env.PORT || 3001
+app.listen(port, () => console.log(`Server running on port ${port}`))
