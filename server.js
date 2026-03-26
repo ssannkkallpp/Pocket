@@ -16,7 +16,7 @@ if (isProd) {
 
 // ── FETCHER PIPELINE ──
 
-async function fetchViaJina(url) {
+export async function fetchViaJina(url) {
   const res = await fetch(`https://r.jina.ai/${url}`, {
     headers: { 'Accept': 'text/plain' }
   })
@@ -27,7 +27,7 @@ async function fetchViaJina(url) {
   return text.trim()
 }
 
-async function fetchViaFirecrawl(url) {
+export async function fetchViaFirecrawl(url) {
   const key = process.env.FIRECRAWL_API_KEY
   if (!key) throw new Error('No Firecrawl key configured')
   const res = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -42,7 +42,7 @@ async function fetchViaFirecrawl(url) {
   return text.trim()
 }
 
-async function fetchViaZyte(url) {
+export async function fetchViaZyte(url) {
   const key = process.env.ZYTE_API_KEY
   if (!key) throw new Error('No Zyte key configured')
   const res = await fetch('https://api.zyte.com/v1/extract', {
@@ -89,5 +89,10 @@ if (isProd) {
   app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'dist', 'index.html')))
 }
 
-const port = process.env.PORT || 3001
-app.listen(port, () => console.log(`Server running on port ${port}`))
+export { app }
+
+// Only start listening when run directly (not when imported by tests)
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const port = process.env.PORT || 3001
+  app.listen(port, () => console.log(`Server running on port ${port}`))
+}
